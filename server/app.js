@@ -1,13 +1,15 @@
-const express = require("express");
 const dotenv = require("dotenv");
+dotenv.config(); // Cấu hình biến môi trường từ file .env
+const express = require("express");
 const connectDB = require("./config/db");
 const cors = require("cors");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
-
-// Cấu hình biến môi trường từ file .env
-dotenv.config();
+const authRoutes = require("./routers/auth");
+const passport = require("passport");
+const googleRoutes = require("./routers/google");
+require("./passport/google"); // cấu hình passport Google
 
 // Kết nối đến cơ sở dữ liệu MongoDB
 connectDB();
@@ -17,6 +19,7 @@ const app = express();
 app.use(cors());
 
 app.use(express.json());
+app.use(passport.initialize());
 
 // Ghi log request ra console, hỗ trợ debug (chế độ dev)
 app.use(morgan("dev"));
@@ -32,7 +35,9 @@ app.use(helmet());
 // app.use(limiter);
 
 // Định nghĩa các tuyến API
-// app.use('/api/auth', authRoutes);
+// Authentication api
+app.use("/api/auth", authRoutes);
+app.use("/api/auth", googleRoutes);
 
 //Middleware xử lý lỗi chung (error handling middleware)
 app.use((err, req, res, next) => {
