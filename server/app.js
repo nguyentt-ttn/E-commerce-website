@@ -9,6 +9,7 @@ const rateLimit = require("express-rate-limit");
 const authRoutes = require("./routers/auth");
 const passport = require("passport");
 const googleRoutes = require("./routers/google");
+const categoryRoutes = require("./routers/category");
 require("./passport/google"); // cấu hình passport Google
 
 // Kết nối đến cơ sở dữ liệu MongoDB
@@ -35,6 +36,8 @@ app.use(helmet());
 // app.use(limiter);
 
 // Định nghĩa các tuyến API
+//Category api
+app.use('/api', categoryRoutes);
 // Authentication api
 app.use("/api/auth", authRoutes);
 app.use("/api/auth", googleRoutes);
