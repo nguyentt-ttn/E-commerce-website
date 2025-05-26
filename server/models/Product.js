@@ -8,6 +8,7 @@ const VariantSchema = new Schema({
   price: Number,
   discountPrice: Number,
   image: String,
+  quantity: { type: Number, default: 0 },
 });
 
 const ProductSchema = new Schema(
@@ -23,6 +24,7 @@ const ProductSchema = new Schema(
     discountPrice: Number, // Giá khuyến mãi chung
     variants: [VariantSchema],
     isActive: { type: Boolean, default: true }, // Trạng thái sản phẩm: có đang bán hay không
+    isDeleted: { type: Boolean, default: false }, // Trạng thái sản phẩm: đã bị xóa hay chưa
   },
   { timestamps: true, versionKey: false }
 );

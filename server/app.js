@@ -10,6 +10,7 @@ const authRoutes = require("./routers/auth");
 const passport = require("passport");
 const googleRoutes = require("./routers/google");
 const categoryRoutes = require("./routers/category");
+const productRouter = require("./routers/product");
 require("./passport/google"); // cấu hình passport Google
 
 // Kết nối đến cơ sở dữ liệu MongoDB
@@ -36,6 +37,9 @@ app.use(helmet());
 // app.use(limiter);
 
 // Định nghĩa các tuyến API
+
+// Product api
+app.use("/api", productRouter);
 //Category api
 app.use('/api', categoryRoutes);
 // Authentication api
