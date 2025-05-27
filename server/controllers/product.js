@@ -8,7 +8,27 @@ const {
 // Tạo sản phẩm mới
 exports.createProduct = async (req, res) => {
   try {
-    const { error } = createProductSchema.validate(req.body, {
+    const images = req.files["images"]?.map((file) => file.path) || [];
+    // Xử lý biến thể (variant)
+    let variants = req.body.variants;
+    if (typeof variants === "string") {
+      variants = JSON.parse(variants);
+    }
+    variants = variants.map((variant, index) => ({
+      ...variant,
+      price: parseFloat(variant.price || 0),
+      discountPrice: parseFloat(variant.discountPrice || 0),
+      quantity: parseInt(variant.quantity || 0),
+      image: req.files[`variants[${index}][image]`]?.[0]?.path || "",
+    }));
+
+    const data = {
+      ...req.body,
+      images,
+      variants,
+    };
+
+    const { error } = createProductSchema.validate(data, {
       abortEarly: false,
     });
     if (error) {
@@ -17,6 +37,7 @@ exports.createProduct = async (req, res) => {
         .json({ message: error.details.map((e) => e.message) });
     }
 
+    //slug
     const slug = slugify(req.body.name);
     const existingProduct = await Product.findOne({ slug });
     if (existingProduct) {
@@ -25,10 +46,7 @@ exports.createProduct = async (req, res) => {
         .json({ message: "Sản phẩm với slug này đã tồn tại" });
     }
 
-    const newProduct = await Product.create({
-      ...req.body,
-      slug,
-    });
+    const newProduct = await Product.create({ ...data, slug });
     res.status(201).json({
       message: "Sản phẩm đã được tạo thành công",
       product: newProduct,
@@ -89,7 +107,28 @@ exports.getProductBySlug = async (req, res) => {
 // Cập nhật sản phẩm
 exports.updateProduct = async (req, res) => {
   try {
-    const { error } = updateProductSchema.validate(req.body, {
+    const images = req.files["images"]?.map((file) => file.path) || [];
+
+    // Xử lý biến thể (variant)
+    let variants = req.body.variants;
+    if (typeof variants === "string") {
+      variants = JSON.parse(variants);
+    }
+    variants = variants.map((variant, index) => ({
+      ...variant,
+      price: parseFloat(variant.price || 0),
+      discountPrice: parseFloat(variant.discountPrice || 0),
+      quantity: parseInt(variant.quantity || 0),
+      image: req.files[`variants[${index}][image]`]?.[0]?.path || "",
+    }));
+
+    const updateData = {
+      ...req.body,
+      images,
+      variants,
+    };
+
+    const { error } = updateProductSchema.validate(updateData, {
       abortEarly: false,
     });
     if (error) {
@@ -98,8 +137,7 @@ exports.updateProduct = async (req, res) => {
         .json({ message: error.details.map((e) => e.message) });
     }
 
-    // Nếu có field name, tạo slug mới
-    let updateData = { ...req.body };
+    // Nếu đổi tên sản phẩm => cập nhật slug
     if (req.body.name) {
       const newSlug = slugify(req.body.name);
 
@@ -150,7 +188,7 @@ exports.softDeleteProduct = async (req, res) => {
 exports.getDeletedProducts = async (req, res) => {
   try {
     const products = await Product.find({ isDeleted: true });
-    res.json({message: "Danh sách sản phẩm đã xóa mềm", products });
+    res.json({ message: "Danh sách sản phẩm đã xóa mềm", products });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

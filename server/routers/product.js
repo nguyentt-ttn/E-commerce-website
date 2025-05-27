@@ -11,18 +11,28 @@ const {
   restoreProduct,
   forceDeleteProduct,
 } = require("../controllers/product");
+const upload = require("../middlewares/upload");
+const { generateVariantFields } = require("../utils/multerFields,js");
 
 // Tạo sản phẩm mới
-productRouter.post("/products", createProduct);
+productRouter.post(
+  "/products",
+  upload.fields(generateVariantFields(10)),
+  createProduct
+);
+
+// Cập nhật sản phẩm theo id
+productRouter.put(
+  "/products/:id",
+  upload.fields(generateVariantFields(10)),
+  updateProduct
+);
 
 // Lấy danh sách sản phẩm chưa xóa
 productRouter.get("/products", getAllProducts);
 
 // Lấy 1 sản phẩm theo slug
 productRouter.get("/products/:slug", getProductBySlug);
-
-// Cập nhật sản phẩm theo id
-productRouter.put("/products/:id", updateProduct);
 
 // Xóa mềm sản phẩm theo id
 productRouter.delete("/products/:id/soft-delete", softDeleteProduct);
