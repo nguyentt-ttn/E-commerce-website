@@ -12,11 +12,12 @@ const {
   forceDeleteProduct,
 } = require("../controllers/product");
 const upload = require("../middlewares/upload");
-const { generateVariantFields } = require("../utils/multerFields,js");
+const { generateVariantFields } = require("../utils/multerFields.js");
+const authMiddleware = require("../middlewares/auth.js");
 
 // Tạo sản phẩm mới
 productRouter.post(
-  "/products",
+  "/products",authMiddleware,
   upload.fields(generateVariantFields(10)),
   createProduct
 );

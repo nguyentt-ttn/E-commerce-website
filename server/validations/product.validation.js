@@ -39,6 +39,7 @@ const createProductSchema = Joi.object({
   images: Joi.array().items(Joi.string().uri()).optional(),
   basePrice: Joi.number().min(0).optional(),
   discountPrice: Joi.number().min(0).optional(),
+  // quantity: Joi.number().optional(),
   variants: Joi.array().items(variantSchema).optional(),
   isActive: Joi.boolean().optional(),
 });

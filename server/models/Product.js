@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const VariantSchema = new Schema({
-  sku: { type: String, required: true }, // Mã hàng hoá duy nhất dùng để quản lý tồn kho
+  sku: { type: String, required: true, unique:true }, // Mã hàng hoá duy nhất dùng để quản lý tồn kho
   color: String,
   size: String,
   price: Number,
