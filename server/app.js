@@ -12,6 +12,7 @@ const googleRoutes = require("./routers/google");
 const categoryRoutes = require("./routers/category");
 const productRouter = require("./routers/product");
 const inventoryRoutes = require("./routers/inventory");
+const CartRouter = require("./routers/cart");
 require("./passport/google"); // cấu hình passport Google
 
 // Kết nối đến cơ sở dữ liệu MongoDB
@@ -44,11 +45,14 @@ app.use(helmet());
 app.use("/api", productRouter);
 // Inventory api
 app.use("/api", inventoryRoutes);
+
 //Category api
 app.use('/api', categoryRoutes);
 // Authentication api
 app.use("/api/auth", authRoutes);
 app.use("/api/auth", googleRoutes);
+// Cart api
+app.use("/api", CartRouter);
 
 //Middleware xử lý lỗi chung (error handling middleware)
 app.use((err, req, res, next) => {
