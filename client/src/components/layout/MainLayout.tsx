@@ -1,14 +1,18 @@
 
 import { Outlet } from 'react-router-dom';
+import HeaderPage from '../common/Header';
+import FooterPage from '../common/Footer';
+import SetTitle from '../common/SetTitle';
 
 const MainLayout = () => {
     return (
         <div>
-            {/* <Header /> */}
+            <SetTitle />
+            <HeaderPage />
             <main>
                 <Outlet />
             </main>
-            {/* <Footer /> */}
+            <FooterPage />
         </div>
     );
 };

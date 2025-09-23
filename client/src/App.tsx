@@ -2,12 +2,13 @@ import { RouterProvider } from 'react-router-dom'
 import './App.css'
 import './index.css'
 import { router } from './routers'
+import SplashCursor from './components/SplashCursor'
+import { Toaster } from 'sonner'
 function App() {
   return (
     <>
-      <div className="text-red-500 text-2xl font-bold">
-        Hello!
-      </div>
+      <Toaster position="top-right" richColors />
+      <SplashCursor />
       <RouterProvider router={router} />
     </>
   )

@@ -10,7 +10,7 @@ interface CustomAxiosRequestConfig extends AxiosRequestConfig {
   isAuthApi?: boolean;
 }
 
-const axiosInstance = axios.create({
+export const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   timeout: 20000,
   headers: {

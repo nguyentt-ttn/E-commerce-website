@@ -13,6 +13,7 @@ const categoryRoutes = require("./routers/category");
 const productRouter = require("./routers/product");
 const inventoryRoutes = require("./routers/inventory");
 const CartRouter = require("./routers/cart");
+const cookieParser = require("cookie-parser");
 require("./passport/google"); // cấu hình passport Google
 
 // Kết nối đến cơ sở dữ liệu MongoDB
@@ -25,6 +26,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
+app.use(cookieParser());
+
 
 // Ghi log request ra console, hỗ trợ debug (chế độ dev)
 app.use(morgan("dev"));

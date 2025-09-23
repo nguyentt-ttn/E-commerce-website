@@ -1,26 +1,27 @@
-const jwt = require('jsonwebtoken');
-
+const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.JWT_SECRET;
 
 exports.googleLoginCallback = (req, res) => {
   try {
     const user = req.user;
+    if (!user) {
+      return res.redirect("http://localhost:5173/google/callback?status=error");
+    }
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "7d" });
 
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
-
-    // Trả token và user về frontend (bạn có thể redirect kèm token nếu dùng frontend riêng)
-    return res.json({
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        avatarUrl: user.avatarUrl,
-        slug: user.slug
-      }
+    // Set cookie HTTP-only
+    res.cookie("token", token, {
+      httpOnly: true,      // không thể truy cập bằng JS (chống XSS)
+      secure: false,       // true nếu chạy HTTPS
+      sameSite: "lax",     // chống CSRF cơ bản
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 ngày
     });
+
+    // res.redirect(`http://localhost:5173/google/callback?token=${token}`);
+    res.redirect("http://localhost:5173/google/callback?status=success");
+
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Lỗi server khi xử lý đăng nhập Google' });
+    res.redirect("http://localhost:5173/google/callback?status=error");
   }
 };
