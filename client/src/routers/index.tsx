@@ -1,9 +1,16 @@
 import MainLayout from "@/components/layout/MainLayout";
+import { AdminLayout } from "@/page/(admin)/layout";
 import LoginPage from "@/page/(auth)/Login/page";
 import RegisterPage from "@/page/(auth)/Register/page";
 import NotFound from "@/page/(website)/NotFound";
+import { Customers } from "@/sections/admin/Customers";
+import { Dashboard } from "@/sections/admin/Dashboard";
+import { Orders } from "@/sections/admin/Oder";
+import { Products } from "@/sections/admin/Product";
 import GoogleCallback from "@/sections/auth/GoogleCallback";
 import { createBrowserRouter } from "react-router-dom";
+import { AdminRoute } from "./AdminRoute";
+import HomePage from "@/page/(website)/Home";
 
 export const router = createBrowserRouter([
     {
@@ -13,7 +20,7 @@ export const router = createBrowserRouter([
         children: [
             {
                 index: true,
-                // element: <Home />,
+                element: <HomePage />,
             },
             {
                 path: "*",
@@ -44,6 +51,24 @@ export const router = createBrowserRouter([
             },
         ],
     },
+    {
+    path: "/admin",
+    element: (
+      <AdminRoute>
+        <AdminLayout />
+      </AdminRoute>
+    ),
+    children: [
+      {
+        children: [
+          { index: true, element: <Dashboard /> },
+          { path: "products", element: <Products /> },
+          { path: "orders", element: <Orders /> },
+          { path: "customers", element: <Customers /> },
+        ],
+      },
+    ],
+  },
     // {
     //     path: "auth",
     //     children: [

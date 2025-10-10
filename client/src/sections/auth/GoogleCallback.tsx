@@ -1,4 +1,5 @@
 import Loader from "@/utils/loading/loading"
+import Cookies from "js-cookie"
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
@@ -18,9 +19,21 @@ const GoogleCallback = () => {
         const status = params.get("status");
 
         if (status) {
-            if (status === "success") toast.success("Đăng nhập Google thành công! 🎉");
-            if (status === "error") toast.error("Đăng nhập Google thất bại!");
+            if (status === "success") {
+                toast.success("Đăng nhập Google thành công! 🎉");
+                const userCookie = Cookies.get("user");
+                if (userCookie) {
+                    const user = JSON.parse(userCookie);
+                    console.log("User from cookie:", user);
+                    navigate("/", { replace: true });
 
+                }
+
+            }
+            if (status === "error") {
+                toast.error("Đăng nhập Google thất bại!");
+                navigate("/auth/login", { replace: true });
+            }
             // Xóa query string khỏi URL
             window.history.replaceState({}, document.title, window.location.pathname);
         }

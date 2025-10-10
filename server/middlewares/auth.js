@@ -2,9 +2,9 @@
 const jwt = require('jsonwebtoken');
 
 const authMiddleware = (req, res, next) => {
-    const token = req.cookies?.token; // 👈 lấy token từ cookie
+    const token = req.cookies?.token;
  if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ message: "Chưa đăng nhập!" });
   }
   // const authHeader = req.headers.authorization;
   // if (!authHeader || !authHeader.startsWith('Bearer ')) {

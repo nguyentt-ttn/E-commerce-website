@@ -1,27 +1,30 @@
 import { QueryKey } from "@/constants/query-key";
-import { authApi } from "@/services/auth/Auth"
-import type { RegsiterInterface } from "@/types/Auth"
+import type { LoginInterface } from "@/types/Auth"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import type { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner";
+import { useAuthContext } from "../useAuthContext";
+import { authApi } from "@/services/auth/auth";
 
-export const useRegister = () => {
+export const useLogin = () => {
     const queryClient = useQueryClient()
     const nav = useNavigate()
+    const { login } = useAuthContext();
 
     return useMutation({
-        mutationFn: (data: RegsiterInterface) => authApi.Register(data),
+        mutationFn: (data: LoginInterface) => authApi.Login(data),
         onSuccess: async (res) => {
-            toast.success(res.data.message)
-            console.log("useRegister", res.data.message);
-            nav('/auth/login')
+            const { message, token, user } = res.data;
+            toast.success(message)
+            login(user, token);
+            nav('/')
             await queryClient.invalidateQueries({ queryKey: [QueryKey.AUTH] })
         },
         onError: (error: AxiosError<{ message?: string }>) => {
             const msg = error?.response?.data?.message || "Có lỗi xảy ra"
             toast.error(msg)
-            console.log("useRegister", error);
+            console.log("useLogin", error);
         },
     })
 }

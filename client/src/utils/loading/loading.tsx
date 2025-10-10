@@ -1,9 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const Loader = () => {
+interface LoaderProps {
+  className?: string;
+}
+
+const Loader: React.FC<LoaderProps> = ({ className }) => {
   return (
-    <StyledWrapper>
+    <StyledWrapper className={className}>
       <div className="loader">
         <div className="truckWrapper">
           <div className="truckBody">
@@ -28,7 +32,7 @@ const Loader = () => {
             </svg>
           </div>
           <div className="road" />
-          <svg xmlSpace="preserve" viewBox="0 0 453.459 453.459" xmlnsXlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" id="Capa_1" version="1.1" fill="#000000" className="lampPost">
+          <svg xmlSpace="preserve" viewBox="0 0 453.459 453.459" xmlnsXlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" id="Capa_1" version="1.1" fill="#ffffff" className="lampPost">
             <path d="M252.882,0c-37.781,0-68.686,29.953-70.245,67.358h-6.917v8.954c-26.109,2.163-45.463,10.011-45.463,19.366h9.993
       c-1.65,5.146-2.507,10.54-2.507,16.017c0,28.956,23.558,52.514,52.514,52.514c28.956,0,52.514-23.558,52.514-52.514
       c0-5.478-0.856-10.872-2.506-16.017h9.992c0-9.354-19.352-17.204-45.463-19.366v-8.954h-6.149C200.189,38.779,223.924,16,252.882,16
@@ -46,6 +50,13 @@ const Loader = () => {
 }
 
 const StyledWrapper = styled.div`
+ transform: scale(0.3);
+  transform-origin: center;
+  margin: 0 auto; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   .loader {
     width: fit-content;
     height: fit-content;

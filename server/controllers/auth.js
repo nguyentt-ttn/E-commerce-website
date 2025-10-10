@@ -28,7 +28,12 @@ exports.register = async (req, res) => {
 
     const existingEmailUser = await User.findOne({ email });
     if (existingEmailUser)
+      
       return res.status(400).json({ message: "Email đã được đăng ký" });
+
+    const existingPhoneUser = await User.findOne({ phone });
+    if (existingPhoneUser)
+      return res.status(400).json({ message: "Số điện thoại đã được đăng ký" });
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -89,7 +94,7 @@ exports.login = async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: "Mật khẩu không đúng" });
 
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
+    const token = jwt.sign({ userId: user._id}, JWT_SECRET, {
       expiresIn: "7d",
     });
 
@@ -97,10 +102,12 @@ exports.login = async (req, res) => {
       message: "Đăng nhập thành công",
       token,
       user: {
-        id: user._id,
+        // id: user._id,
         name: user.name,
         email: user.email,
         slug: user.slug,
+        avatarUrl: user.avatarUrl,
+        role: user.role,
       },
     });
   } catch (error) {
