@@ -5,7 +5,7 @@ import type { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner";
 import { useAuthContext } from "../useAuthContext";
-import { authApi } from "@/services/auth/auth";
+import { authApi } from "@/services/auth/Auth";
 
 export const useLogin = () => {
     const queryClient = useQueryClient()

@@ -16,6 +16,7 @@ export const axiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+   withCredentials: true
 });
 
 axiosInstance.interceptors.response.use(

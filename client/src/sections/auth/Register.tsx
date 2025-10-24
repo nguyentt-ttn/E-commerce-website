@@ -12,7 +12,6 @@ const Register = () => {
   const { mutate, isPending } = useRegister()
   const { login: googleLogin } = useGoogleLogin()
 
-
   const {
     register,
     handleSubmit,

@@ -13,11 +13,18 @@ const UserSchema = new Schema(
     phone: { type: String },
     address: { type: String },
     status: {
-      type: Boolean,
-      default: true,
+      type: String,
+      enum: ["active", "inactive", "banned", "pending", "deleted"],
+      default: "pending",
     },
-
-    role: { type: String, enum: ["user", "admin"], default: "user" },
+    // xác thực tài khoản
+    verifyCode: String,
+    verifyCodeExpires: Date,
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
   },
   { timestamps: true, versionKey: false }
 );

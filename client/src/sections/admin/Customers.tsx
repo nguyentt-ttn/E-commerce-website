@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { use, useState } from 'react';
 import {
   MoreHorizontal,
   Search,
@@ -34,75 +34,78 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useGetAllUsers } from '@/hook/Auth/users/useUser';
 
-const customers = [
-  {
-    id: 1,
-    name: 'Nguyễn Văn A',
-    email: 'nguyenvana@email.com',
-    phone: '0901234567',
-    orders: 15,
-    spent: '12,500,000đ',
-    status: 'active',
-    joined: '15/08/2025',
-    avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
-  },
-  {
-    id: 2,
-    name: 'Trần Thị B',
-    email: 'tranthib@email.com',
-    phone: '0912345678',
-    orders: 8,
-    spent: '6,800,000đ',
-    status: 'active',
-    joined: '20/08/2025',
-    avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg',
-  },
-  {
-    id: 3,
-    name: 'Lê Văn C',
-    email: 'levanc@email.com',
-    phone: '0923456789',
-    orders: 3,
-    spent: '2,100,000đ',
-    status: 'inactive',
-    joined: '05/09/2025',
-    avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg',
-  },
-  {
-    id: 4,
-    name: 'Phạm Thị D',
-    email: 'phamthid@email.com',
-    phone: '0934567890',
-    orders: 22,
-    spent: '18,900,000đ',
-    status: 'vip',
-    joined: '10/07/2025',
-    avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg',
-  },
-  {
-    id: 5,
-    name: 'Hoàng Văn E',
-    email: 'hoangvane@email.com',
-    phone: '0945678901',
-    orders: 12,
-    spent: '9,200,000đ',
-    status: 'active',
-    joined: '25/08/2025',
-    avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg',
-  },
-  {
-    id: 6,
-    name: 'Vũ Thị F',
-    email: 'vuthif@email.com',
-    phone: '0956789012',
-    orders: 5,
-    spent: '3,500,000đ',
-    status: 'active',
-    joined: '01/09/2025',
-    avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg',
-  },
-];
+// const customers = [
+//   {
+//     id: 1,
+//     name: 'Nguyễn Văn A',
+//     email: 'nguyenvana@email.com',
+//     phone: '0901234567',
+//     orders: 15,
+//     spent: '12,500,000đ',
+//     status: 'active',
+//     joined: '15/08/2025',
+//     avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
+//   },
+//   {
+//     id: 2,
+//     name: 'Trần Thị B',
+//     email: 'tranthib@email.com',
+//     phone: '0912345678',
+//     orders: 8,
+//     spent: '6,800,000đ',
+//     status: 'active',
+//     joined: '20/08/2025',
+//     avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg',
+//   },
+//   {
+//     id: 3,
+//     name: 'Lê Văn C',
+//     email: 'levanc@email.com',
+//     phone: '0923456789',
+//     orders: 3,
+//     spent: '2,100,000đ',
+//     status: 'inactive',
+//     joined: '05/09/2025',
+//     avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg',
+//   },
+//   {
+//     id: 4,
+//     name: 'Phạm Thị D',
+//     email: 'phamthid@email.com',
+//     phone: '0934567890',
+//     orders: 22,
+//     spent: '18,900,000đ',
+//     status: 'vip',
+//     joined: '10/07/2025',
+//     avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg',
+//   },
+//   {
+//     id: 5,
+//     name: 'Hoàng Văn E',
+//     email: 'hoangvane@email.com',
+//     phone: '0945678901',
+//     orders: 12,
+//     spent: '9,200,000đ',
+//     status: 'active',
+//     joined: '25/08/2025',
+//     avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg',
+//   },
+//   {
+//     id: 6,
+//     name: 'Vũ Thị F',
+//     email: 'vuthif@email.com',
+//     phone: '0956789012',
+//     orders: 5,
+//     spent: '3,500,000đ',
+//     status: 'active',
+//     joined: '01/09/2025',
+//     avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg',
+//   },
+// ];
+
+
 
 const statusColors = {
   active: 'bg-green-100 text-green-700 hover:bg-green-100',
@@ -118,7 +121,8 @@ const statusLabels = {
 
 export function Customers() {
   const [searchQuery, setSearchQuery] = useState('');
-
+const {data: customers} = useGetAllUsers();
+console.log("Customers data:", customers);
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -215,21 +219,21 @@ export function Customers() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {customers.map((customer) => (
-                <TableRow key={customer.id}>
+              {customers?.users.map((customer) => (
+                <TableRow key={customer._id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={customer.avatar} />
+                        <AvatarImage src={customer?.avatarUrl} />
                         <AvatarFallback>
-                          {customer.name.charAt(0)}
+                          {customer?.name.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium text-gray-900">
-                          {customer.name}
+                          {customer?.name}
                         </p>
-                        <p className="text-sm text-gray-600">ID: #{customer.id}</p>
+                        <p className="text-sm text-gray-600">ID: #{customer._id}</p>
                       </div>
                     </div>
                   </TableCell>
@@ -251,13 +255,13 @@ export function Customers() {
                   <TableCell className="font-medium text-blue-600">
                     {customer.spent}
                   </TableCell>
-                  <TableCell>
-                    <Badge
+                  <TableCell className="font-medium">
+                    {/* <Badge
                       variant="secondary"
                       className={statusColors[customer.status as keyof typeof statusColors]}
-                    >
-                      {statusLabels[customer.status as keyof typeof statusLabels]}
-                    </Badge>
+                    > */}
+                      {customer.status }
+                    {/* </Badge> */}
                   </TableCell>
                   <TableCell className="text-gray-600">
                     {customer.joined}
