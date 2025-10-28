@@ -11,6 +11,9 @@ export const authApi = {
   ResendVerificationCode: async (data: { email: string; via: string }) => {
     return await axiosInstance.post("auth/resend", data);
   },
+  VerifyAccountByLink: async (token: string) => {
+    return await axiosInstance.get(`auth/verify-link?token=${token}`);
+  },
   Login: async (formData: LoginInterface) => {
     return await axiosInstance.post("auth/login", formData);
   },

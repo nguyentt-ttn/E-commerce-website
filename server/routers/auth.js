@@ -9,6 +9,7 @@ const { resendLimiter, verifyLimiter } = require("../middlewares/rateLimiter");
 authRoutes.post("/register", authController.register);
 authRoutes.post("/verify", verifyLimiter, authController.verifyAccount);
 authRoutes.post("/resend", resendLimiter, authController.resendVerificationCode);
+authRoutes.get("/verify-link", verifyLimiter, authController.verifyAccountByLink);
 
 // Đăng nhập
 authRoutes.post("/login", authController.login);

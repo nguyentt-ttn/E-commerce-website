@@ -17,6 +17,10 @@ if (TWILIO_SID && TWILIO_TOKEN) {
   twilioClient = twilio(TWILIO_SID, TWILIO_TOKEN);
 }
 
+transporter.defaults = {
+  from: `"Xác minh tài khoản" <${process.env.EMAIL_USER}>`,
+};
+
 // Setup transporter nodemailer
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -31,22 +35,29 @@ function generateVerificationCode() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+function generateVerificationToken(email) {
+  return jwt.sign({ email }, JWT_SECRET, { expiresIn: "10m" }); // 10 phút
+}
+
 // Helper: chuẩn hóa số điện thoại
 function formatPhoneNumber(phone) {
   if (!phone) return null;
-  const clean = phone.replace(/\s+/g, "").trim();
+  // const clean = phone.replace(/\s+/g, "").trim();
+  const clean = String(phone).replace(/\s+/g, "").trim();
   return clean.startsWith("+84") ? clean : clean.replace(/^0/, "+84");
 }
+
 /**
  * sendVerificationEmail
  */
-async function sendVerificationEmail({ to, name, code }) {
+async function sendVerificationEmail({ to, name, code, link }) {
   const html = `
     <div>
       <p>Xin chào ${name},</p>
       <p>Mã xác nhận tài khoản của bạn là:</p>
       <h2>${code}</h2>
-      <p>Mã sẽ hết hạn sau 10 phút.</p>
+      <p>Hoặc bạn có thể <a href="${link}" target="_blank">nhấn vào đây để xác minh tài khoản</a> ngay.</p>
+      <p>Sẽ hết hạn sau 10 phút.</p>
     </div>
   `;
   return transporter.sendMail({
@@ -120,10 +131,7 @@ exports.register = async (req, res) => {
       avatarUrl,
       password: hashedPassword,
       slug,
-      phone:
-        formattedPhone && formattedPhone !== ""
-          ? formattedPhone
-          : "Chưa cập nhật",
+      phone: formattedPhone || "Chưa cập nhật",
       address,
       provider: "local",
       status: "pending",
@@ -136,34 +144,27 @@ exports.register = async (req, res) => {
     // Gửi mã xác minh
     try {
       if (via === "sms" && formattedPhone && twilioClient) {
-        console.log("📨 Gửi mã SMS đến:", formattedPhone);
         await sendVerificationSMS({
           to: formattedPhone,
           code: verificationCode,
         });
       } else if (via === "email") {
-        console.log("📧 Gửi mã Email đến:", email);
+        const token = generateVerificationToken(email);
+        const verifyLink = `${process.env.CLIENT_URL}/auth/verify-link?token=${token}`;
+
         await sendVerificationEmail({
           to: email,
           name,
           code: verificationCode,
+          link: verifyLink,
         });
-      } else {
-        // ⚠️ Nếu chưa chọn cách gửi thì chỉ lưu user, không gửi mã
-        console.log(
-          "⚠️ Chưa chọn phương thức gửi mã, user ở trạng thái pending"
-        );
       }
-    } catch (sendErr) {
-      console.error("Gửi mã xác nhận thất bại:", sendErr);
-      console.warn("⚠️ Twilio gửi lỗi (dev mode):", sendErr.message);
-      console.log("👉 Mã xác nhận là:", verificationCode);
-
-      // return res.status(500).json({ message: "Gửi mã xác nhận thất bại." });
+    } catch (error) {
+      return res.status(500).json({ message: "Gửi mã xác nhận thất bại." });
     }
 
     res.json({
-      message: "Vui lòng kiểm tra email hoặc SMS để nhận mã xác nhận.",
+      message: "Đăng ký tài khoản thành công!",
       user: {
         id: user._id,
         name: user.name,
@@ -176,7 +177,6 @@ exports.register = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("❌ Lỗi server:", err);
     res.status(500).json({ message: error.message || "Lỗi server" });
   }
 };
@@ -218,9 +218,47 @@ exports.verifyAccount = async (req, res) => {
     await user.save();
 
     return res.json({ message: "Kích hoạt tài khoản thành công" });
-  } catch (err) {
-    console.error("verifyAccount error:", err);
+  } catch (error) {
     return res.status(500).json({ message: "Lỗi server" });
+  }
+};
+
+exports.verifyAccountByLink = async (req, res) => {
+  try {
+    const { token } = req.query;
+    if (!token) return res.status(400).json({ message: "Thiếu token" });
+
+    // Xác thực token
+    // const decoded = jwt.verify(token, JWT_SECRET);
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      if (err.name === "TokenExpiredError") {
+        return res.status(401).json({ message: "Liên kết đã hết hạn" });
+      }
+      return res.status(400).json({ message: "Liên kết không hợp lệ" });
+    }
+
+    const email = decoded.email;
+    const user = await User.findOne({ email });
+    if (!user)
+      return res.status(400).json({ message: "Không tìm thấy tài khoản" });
+
+    if (user.status === "active") {
+      return res.status(200).json({ message: "Tài khoản đã được kích hoạt" });
+    }
+
+    user.status = "active";
+    user.verifyCode = undefined;
+    user.verifyCodeExpires = undefined;
+    await user.save();
+
+    return res.status(200).json({ message: "Xác minh tài khoản thành công" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Lỗi server khi xác minh tài khoản" });
   }
 };
 
@@ -247,26 +285,23 @@ exports.resendVerificationCode = async (req, res) => {
 
     try {
       if (via === "sms" && user.phone && twilioClient) {
-        console.log("Gửi lại SMS đến:", user.phone);
         await sendVerificationSMS({ to: user.phone, code: verificationCode });
       } else {
-        console.log(" Gửi lại Email đến:", user.email);
+        const token = generateVerificationToken(email);
+        const verifyLink = `${process.env.CLIENT_URL}/auth/verify-link?token=${token}`;
         await sendVerificationEmail({
           to: user.email,
           name: user.name,
           code: verificationCode,
+          link: verifyLink,
         });
       }
     } catch (sendErr) {
-      console.error("Gửi lại mã thất bại:", sendErr);
-      console.log(" Mã xác nhận (dev mode):", verificationCode);
-
-      // return res.status(500).json({ message: "Gửi mã thất bại" });
+      return res.status(500).json({ message: "Gửi mã thất bại" });
     }
 
-    return res.json({ message: "Đã gửi lại mã xác nhận" });
-  } catch (err) {
-    console.error(err);
+    return res.status(200).json({ message: "Đã gửi lại mã xác nhận" });
+  } catch (error) {
     return res.status(500).json({ message: "Lỗi server" });
   }
 };
